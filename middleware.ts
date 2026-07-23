@@ -7,15 +7,37 @@ export function middleware(req: NextRequest) {
   const refreshToken = req.cookies.get('refresh_token')?.value;
   const hasToken = !!(accessToken || refreshToken);
 
-  // Rutas públicas que no requieren estar autenticado
-  const isPublicPath = pathname === '/login' || pathname.startsWith('/api/auth');
+  // 1. Eximir totalmente estáticos y assets de Next.js
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.match(/\.(?:svg|png|jpg|jpeg|gif|webp)$/)
+  ) {
+    return NextResponse.next();
+  }
 
-  if (!hasToken && !isPublicPath) {
+  // 2. Manejo de APIs (/api/*)
+  if (pathname.startsWith('/api')) {
+    // Endpoints públicos de autenticación
+    if (pathname.startsWith('/api/auth')) {
+      return NextResponse.next();
+    }
+    // Si la API requiere autenticación y no hay token, retornar JSON 401 en lugar de redirección HTML
+    if (!hasToken) {
+      return NextResponse.json({ message: 'No autorizado' }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
+  // 3. Manejo de vistas/páginas del frontend
+  const isLoginPage = pathname === '/login';
+
+  if (!hasToken && !isLoginPage) {
     const loginUrl = new URL('/login', req.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (hasToken && pathname === '/login') {
+  if (hasToken && isLoginPage) {
     const homeUrl = new URL('/', req.url);
     return NextResponse.redirect(homeUrl);
   }
@@ -24,14 +46,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

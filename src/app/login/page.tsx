@@ -42,10 +42,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+    <div className="h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200 overflow-hidden">
       
-      {/* ─── COLUMNA IZQUIERDA: HERO CORPORATIVO & MÉTRICAS DE IMPACTO (Oculto en móviles) ─── */}
-      <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 relative flex-col justify-between p-12 bg-gradient-to-br from-[#060910] via-[#0b1220] to-[#0a1528] text-white overflow-hidden border-r border-slate-800/60">
+      {/* ─── COLUMNA IZQUIERDA: HERO CORPORATIVO (Solo escritorio) ─── */}
+      <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 relative flex-col justify-between p-12 bg-gradient-to-br from-[#060910] via-[#0b1220] to-[#0a1528] text-white overflow-hidden border-r border-slate-800/60 h-full">
         
         {/* Glows ambientales sutiles */}
         <div className="absolute top-0 -left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
@@ -107,7 +107,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Footer Inferior Izquierdo: Insignias de Cumplimiento */}
+        {/* Footer Inferior Izquierdo */}
         <div className="relative z-10 flex items-center justify-between pt-6 border-t border-slate-800/80 text-xs text-slate-400">
           <div className="flex items-center space-x-4">
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Cifrado AES-256</span>
@@ -117,8 +117,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ─── COLUMNA DERECHA: FORMULARIO DE ACCESO Y SELECTOR DE ROL ─── */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-6 sm:p-12 lg:p-16">
+      {/* ─── COLUMNA DERECHA: FORMULARIO PERFECTAMENTE CENTRADO ─── */}
+      <div className="lg:col-span-6 xl:col-span-5 flex flex-col h-full justify-between p-6 sm:p-12 relative">
         
         {/* Header Superior Derecho */}
         <div className="flex items-center justify-between w-full">
@@ -131,8 +131,8 @@ export default function LoginPage() {
           <ThemeToggle />
         </div>
 
-        {/* Formulario Principal de Login */}
-        <div className="w-full max-w-md mx-auto space-y-8 my-auto py-8">
+        {/* Contenedor del Formulario Perfectamente Centrado V-y-H */}
+        <div className="w-full max-w-md mx-auto my-auto py-6 space-y-6">
           <div className="space-y-2 text-left">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               Iniciar Sesión
@@ -155,6 +155,7 @@ export default function LoginPage() {
                     <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                     <Input
                       type="email"
+                      autoComplete="username"
                       placeholder="analyst@capital.mx"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -175,6 +176,7 @@ export default function LoginPage() {
                     <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -209,7 +211,7 @@ export default function LoginPage() {
                 </Button>
               </form>
 
-              {/* Acceso Rápido Demo (Pills Ejecutivas) */}
+              {/* Acceso Rápido Demo */}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block text-center">
                   Seleccionar Credenciales Demo
