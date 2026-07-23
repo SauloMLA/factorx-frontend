@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, Bell } from 'lucide-react';
+import { Search, User, Bell, LogOut, Shield } from 'lucide-react';
 import { clientService } from '@/services/client.service';
 import { useQuery } from '@tanstack/react-query';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useAuth } from '@/hooks/useAuth';
+import { UserRole } from '@/types/auth';
 
 export default function Header() {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
 
@@ -16,6 +19,7 @@ export default function Header() {
   const { data: clients } = useQuery({
     queryKey: ['clients', 'quick-search'],
     queryFn: () => clientService.getClients(),
+    enabled: !!user,
   });
 
   const filteredClients = searchQuery.trim()
@@ -88,16 +92,41 @@ export default function Header() {
 
         <div className="h-8 w-px bg-slate-200 dark:bg-[#1e293b]/40 mx-1"></div>
 
-        {/* Perfil del Analista */}
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Analista Senior</p>
-            <p className="text-[10px] text-slate-500 dark:text-slate-500">Mesa de Control</p>
+        {/* Perfil del Usuario Autenticado */}
+        {user ? (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/perfil')}
+              className="flex items-center gap-2.5 text-right hover:opacity-80 transition-opacity text-left"
+            >
+              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-500/20">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-tight">{user.name}</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center justify-end gap-1">
+                  <Shield className="w-2.5 h-2.5 inline text-blue-500" />
+                  {user.role === UserRole.ADMINISTRATOR ? 'Administrador' : 'Operador'}
+                </p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => logout()}
+              title="Cerrar Sesión"
+              className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
-          <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/40 flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <User className="h-4 w-4" />
-          </div>
-        </div>
+        ) : (
+          <button
+            onClick={() => router.push('/login')}
+            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          >
+            <User className="h-3.5 w-3.5" /> Iniciar Sesión
+          </button>
+        )}
       </div>
     </header>
   );
