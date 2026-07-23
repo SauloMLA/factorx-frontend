@@ -69,14 +69,14 @@ export default function ClientTable() {
           onValueChange={(val) => setStatusFilter(val as any)}
           className="w-full sm:w-auto"
         >
-          <TabsList className="bg-slate-100 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/40 text-slate-600 dark:text-slate-400 p-1">
-            <TabsTrigger value="ALL" className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1e293b] data-[state=active]:text-slate-900 dark:data-[state=active]:text-white">
+          <TabsList className="h-[38px] grid w-full sm:w-[450px] grid-cols-3 p-1 bg-slate-100 dark:bg-[#111625] rounded-lg border border-slate-200 dark:border-[#1e293b]/40">
+            <TabsTrigger value="ALL">
               Todos ({clients?.length || 0})
             </TabsTrigger>
-            <TabsTrigger value="APPROVED" className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1e293b] data-[state=active]:text-slate-900 dark:data-[state=active]:text-white">
+            <TabsTrigger value="APPROVED">
               Aprobados ({clients?.filter(c => c.status === 'APPROVED').length || 0})
             </TabsTrigger>
-            <TabsTrigger value="PENDING" className="data-[state=active]:bg-white dark:data-[state=active]:bg-[#1e293b] data-[state=active]:text-slate-900 dark:data-[state=active]:text-white">
+            <TabsTrigger value="PENDING">
               Pendientes ({clients?.filter(c => c.status === 'PENDING').length || 0})
             </TabsTrigger>
           </TabsList>

@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-200">
+      <body className="min-h-full bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-200" suppressHydrationWarning>
         <Providers>
           <AppLayoutWrapper>{children}</AppLayoutWrapper>
           <Toaster position="top-right" closeButton />

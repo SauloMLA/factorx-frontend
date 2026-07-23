@@ -6,6 +6,20 @@ import { Search, User, Bell, LogOut, Shield } from 'lucide-react';
 import { clientService } from '@/services/client.service';
 import { useQuery } from '@tanstack/react-query';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 
@@ -85,20 +99,31 @@ export default function Header() {
         {/* Toggle de Modo Claro / Oscuro */}
         <ThemeToggle />
 
-        <button className="p-2 rounded-lg bg-slate-100 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/40 hover:bg-slate-200 dark:hover:bg-[#1e293b]/20 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-150 relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 bg-blue-500 rounded-full"></span>
-        </button>
+        <Popover>
+          <PopoverTrigger className="p-2 rounded-lg bg-slate-100 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/40 hover:bg-slate-200 dark:hover:bg-[#1e293b]/20 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-150 relative">
+            <Bell className="h-4 w-4" />
+            <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 bg-blue-500 rounded-full"></span>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 p-0 overflow-hidden bg-white/95 dark:bg-[#0f1422]/95 backdrop-blur-md border border-slate-200 dark:border-[#1e293b]/60 shadow-xl shadow-slate-200/20 dark:shadow-black/40">
+            <div className="p-4 border-b border-slate-100 dark:border-[#1e293b]/40 bg-slate-50/50 dark:bg-[#111625]/50">
+              <h4 className="font-semibold text-slate-800 dark:text-slate-200">Notificaciones</h4>
+            </div>
+            <div className="p-8 text-center flex flex-col items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-[#1e293b]/40 flex items-center justify-center mb-3">
+                <Bell className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+              </div>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Estás al día</p>
+              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">No hay notificaciones recientes.</p>
+            </div>
+          </PopoverContent>
+        </Popover>
 
         <div className="h-8 w-px bg-slate-200 dark:bg-[#1e293b]/40 mx-1"></div>
 
         {/* Perfil del Usuario Autenticado */}
         {user ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push('/perfil')}
-              className="flex items-center gap-2.5 text-right hover:opacity-80 transition-opacity text-left"
-            >
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2.5 text-right hover:opacity-80 transition-opacity text-left outline-none rounded-lg p-1 hover:bg-slate-50 dark:hover:bg-[#1e293b]/20">
               <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-md shadow-blue-500/20">
                 {user.name.charAt(0).toUpperCase()}
               </div>
@@ -109,16 +134,28 @@ export default function Header() {
                   {user.role === UserRole.ADMINISTRATOR ? 'Administrador' : 'Operador'}
                 </p>
               </div>
-            </button>
-
-            <button
-              onClick={() => logout()}
-              title="Cerrar Sesión"
-              className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-white/95 dark:bg-[#0f1422]/95 backdrop-blur-md border border-slate-200 dark:border-[#1e293b]/60 shadow-xl shadow-slate-200/20 dark:shadow-black/40">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none text-slate-800 dark:text-slate-200">{user.name}</p>
+                    <p className="text-xs leading-none text-slate-500 dark:text-slate-400">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator className="bg-slate-100 dark:bg-[#1e293b]/40" />
+              <DropdownMenuItem className="cursor-pointer text-slate-700 dark:text-slate-300 focus:bg-slate-100 dark:focus:bg-[#1e293b]/40" onClick={() => router.push('/perfil')}>
+                <User className="mr-2 h-4 w-4" />
+                <span>Mi Perfil</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-100 dark:bg-[#1e293b]/40" />
+              <DropdownMenuItem className="cursor-pointer text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-950/30 focus:text-rose-600" onClick={() => logout()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Cerrar Sesión</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : (
           <button
             onClick={() => router.push('/login')}
