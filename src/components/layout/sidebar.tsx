@@ -12,7 +12,7 @@ const baseMenuItems = [
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Operaciones', href: '/operaciones', icon: FileSpreadsheet },
   { name: 'Nueva Originación', href: '/operaciones/nueva', icon: PlusCircle },
-  { name: 'Mi Perfil', href: '/perfil', icon: User },
+  { name: 'Usuarios', href: '/usuarios', icon: User },
 ];
 
 export default function Sidebar() {
