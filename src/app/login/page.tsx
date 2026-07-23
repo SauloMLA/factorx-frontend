@@ -20,6 +20,8 @@ import {
   Award,
   Globe,
   Sparkles,
+  Shield,
+  UserCheck,
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -61,7 +63,7 @@ export default function LoginPage() {
               Factor<span className="text-blue-400">Core</span>
             </h1>
             <span className="text-xs text-slate-400 font-medium tracking-wide">
-              Mesa de Control Financial SaaS
+              Plataforma de Factoraje Financiero
             </span>
           </div>
         </div>
@@ -111,7 +113,7 @@ export default function LoginPage() {
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-400" /> Cifrado AES-256</span>
             <span className="flex items-center gap-1.5"><Globe className="w-4 h-4 text-blue-400" /> ISO 27001</span>
           </div>
-          <span className="font-mono text-[11px] text-slate-500">Capital X Inc. © 2026</span>
+          <span className="font-mono text-[11px] text-slate-500">FactorCore Systems © 2026</span>
         </div>
       </div>
 
@@ -133,10 +135,10 @@ export default function LoginPage() {
         <div className="w-full max-w-md mx-auto space-y-8 my-auto py-8">
           <div className="space-y-2 text-left">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Bienvenido de nuevo
+              Iniciar Sesión
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Ingresa tus credenciales autorizadas para ingresar a la terminal.
+              Ingresa tus credenciales autorizadas para acceder a la terminal de FactorCore.
             </p>
           </div>
 
@@ -210,7 +212,7 @@ export default function LoginPage() {
               {/* Acceso Rápido Demo (Pills Ejecutivas) */}
               <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block text-center">
-                  Cargar Credenciales de Prueba
+                  Seleccionar Credenciales Demo
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -218,7 +220,9 @@ export default function LoginPage() {
                     onClick={() => handleDemoFill('analyst@capital.mx')}
                     className="flex flex-col items-center justify-center p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors text-center"
                   >
-                    <span className="font-bold text-blue-600 dark:text-blue-400">👑 Administrador</span>
+                    <div className="flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400">
+                      <Shield className="w-3.5 h-3.5" /> Administrador
+                    </div>
                     <span className="text-[10px] text-slate-400">Mesa de Control</span>
                   </button>
 
@@ -227,7 +231,9 @@ export default function LoginPage() {
                     onClick={() => handleDemoFill('operador@capital.mx')}
                     className="flex flex-col items-center justify-center p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors text-center"
                   >
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">🏢 Operador</span>
+                    <div className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                      <UserCheck className="w-3.5 h-3.5" /> Operador
+                    </div>
                     <span className="text-[10px] text-slate-400">Originación</span>
                   </button>
                 </div>
