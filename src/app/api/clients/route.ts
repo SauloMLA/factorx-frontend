@@ -1,27 +1,62 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005').replace(/\/$/, '');
+
+export async function GET(req: NextRequest) {
   try {
-    const clients = await prisma.clientRecord.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
-    
-    const mappedClients = clients.map(client => ({
-      id: client.id,
-      rfc: client.rfc,
-      name: client.name,
-      email: client.email,
-      status: client.status,
-      createdAt: client.createdAt.toISOString(),
-      updatedAt: client.updatedAt.toISOString(),
-    }));
+    const accessToken = req.cookies.get('access_token')?.value;
 
-    return NextResponse.json(mappedClients);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Error al obtener clientes desde el BFF: ' + error.message },
-      { status: 500 }
-    );
+    if (!accessToken) {
+      return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
+    }
+
+    const res = await fetch(`${API_URL}/clientes`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(
+        { message: data.message || 'Error al obtener clientes' },
+        { status: res.status },
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ message: 'Error de conexión con el backend' }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const accessToken = req.cookies.get('access_token')?.value;
+    const body = await req.json();
+
+    const res = await fetch(`${API_URL}/clientes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(
+        { message: data.message || 'Error al registrar cliente' },
+        { status: res.status },
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ message: 'Error de conexión con el backend' }, { status: 500 });
   }
 }
