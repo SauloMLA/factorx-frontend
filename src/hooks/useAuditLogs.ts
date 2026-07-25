@@ -19,6 +19,11 @@ interface AuditLogFilters {
   performedBy?: string;
 }
 
+function getAuthHeaders(): Record<string, string> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export const useAuditLogs = (filters?: AuditLogFilters) => {
   return useQuery({
     queryKey: ['auditLogs', filters],
@@ -30,7 +35,10 @@ export const useAuditLogs = (filters?: AuditLogFilters) => {
       
       const queryString = params.toString();
       const url = `/api/auditoria${queryString ? `?${queryString}` : ''}`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: getAuthHeaders(),
+        credentials: 'same-origin',
+      });
       
       if (!response.ok) {
         const errorData = await response.json();

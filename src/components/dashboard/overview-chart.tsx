@@ -9,12 +9,16 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
+import { useLanguage } from '@/context/language-context';
 
 export function OverviewChart({ data }: { data: any[] }) {
+  const { t, language } = useLanguage();
+  const locale = language === 'en' ? 'en-US' : 'es-MX';
+
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-sm text-slate-500">
-        No hay datos suficientes para graficar.
+      <div className="flex items-center justify-center h-[300px] text-xs text-slate-400 dark:text-slate-500 font-medium">
+        {t('dash.volume_empty')}
       </div>
     );
   }
@@ -40,24 +44,25 @@ export function OverviewChart({ data }: { data: any[] }) {
         <Tooltip
           cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
           contentStyle={{
-            backgroundColor: '#1e293b',
-            border: 'none',
-            borderRadius: '8px',
+            backgroundColor: '#111625',
+            border: '1px solid #1e293b',
+            borderRadius: '12px',
             color: '#fff',
+            fontSize: '12px',
           }}
-          itemStyle={{ color: '#fff' }}
+          itemStyle={{ color: '#60a5fa' }}
           formatter={(value: any) => [
-            new Intl.NumberFormat('es-MX', {
+            new Intl.NumberFormat(locale, {
               style: 'currency',
               currency: 'MXN',
             }).format(Number(value || 0)),
-            'Monto',
+            language === 'en' ? 'Amount' : 'Monto',
           ]}
         />
         <Bar
           dataKey="volume"
           fill="#3b82f6"
-          radius={[4, 4, 0, 0]}
+          radius={[6, 6, 0, 0]}
         />
       </BarChart>
     </ResponsiveContainer>
