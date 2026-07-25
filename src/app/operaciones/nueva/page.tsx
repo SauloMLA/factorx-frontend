@@ -14,6 +14,7 @@ import { useCreateOperationMutation } from '@/hooks/useOperations';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/context/language-context';
 
 // Helper para calcular la diferencia de días calendario exactos
 const getRemainingDays = (reqDate: Date, dueDate: Date) => {
@@ -104,6 +105,7 @@ function NewOperationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedClientId = searchParams.get('clientId') || '';
+  const { t, language } = useLanguage();
 
   const { data: clients, isLoading: isClientsLoading } = useClientsQuery();
   const createOperationMutation = useCreateOperationMutation();
@@ -123,7 +125,7 @@ function NewOperationForm() {
     mode: 'onChange',
     defaultValues: {
       clientId: preselectedClientId,
-      requestDate: new Date().toISOString().substring(0, 10), // Hoy por defecto
+      requestDate: new Date().toISOString().substring(0, 10),
       invoices: [
         {
           folio: '',
@@ -146,13 +148,11 @@ function NewOperationForm() {
   const selectedClientId = watch('clientId');
   const watchRequestDate = watch('requestDate');
 
-  // Cálculos financieros en tiempo real (Invariantes RD-OP-003)
   const totalAmount = watchInvoices.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
-  const advancedAmount = Math.round(totalAmount * 0.85 * 100) / 100; // 85% Aforo
-  const commission = Math.round(totalAmount * 0.015 * 100) / 100; // 1.5% Comisión
-  const depositAmount = Math.round((advancedAmount - commission) * 100) / 100; // Depósito neto
+  const advancedAmount = Math.round(totalAmount * 0.85 * 100) / 100;
+  const commission = Math.round(totalAmount * 0.015 * 100) / 100;
+  const depositAmount = Math.round((advancedAmount - commission) * 100) / 100;
 
-  // Si cambia el cliente preseleccionado en la URL
   useEffect(() => {
     if (preselectedClientId) {
       setValue('clientId', preselectedClientId);
@@ -175,47 +175,49 @@ function NewOperationForm() {
 
     createOperationMutation.mutate(payload, {
       onSuccess: (data) => {
-        toast.success('Operación originada exitosamente', {
-          description: `Se han fondeado ${values.invoices.length} facturas. ID Operación: ${data.operationId.substring(0, 8)}...`,
+        toast.success(t('ops.confirm_origination'), {
+          description: `ID: ${data.operationId.substring(0, 8)}...`,
         });
         router.push(`/clientes/${values.clientId}`);
       },
       onError: (error: any) => {
-        toast.error('Fallo en la originación financiera', {
-          description: error.message || 'Verifica los plazos y folios duplicados.',
+        toast.error('Error', {
+          description: error.message || 'Error',
         });
       },
     });
   };
 
+  const locale = language === 'en' ? 'en-US' : 'es-MX';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Botón de regreso */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1e293b]/40 pb-4">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1e293b]/60 pb-4">
         <div className="space-y-1">
           <Link href="/operaciones" className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors mb-1">
-            <ArrowLeft className="h-3.5 w-3.5" /> Volver a Operaciones
+            <ArrowLeft className="h-3.5 w-3.5" /> {t('ops.back_to_ops')}
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Originación de Operaciones</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{t('ops.new_title')}</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Carga de lotes de facturas para la cesión de derechos y anticipo de liquidez.
+            {t('ops.new_subtitle')}
           </p>
         </div>
       </div>
 
       {isClientsLoading ? (
-        <div className="py-20 text-center text-sm text-slate-500">Cargando catálogo de clientes...</div>
+        <div className="py-20 text-center text-sm text-slate-500">{t('common.loading')}</div>
       ) : approvedClients.length === 0 ? (
-        <Card className="bg-amber-50/50 dark:bg-[#17111e]/20 border-amber-200 dark:border-amber-500/20 py-16 text-center">
+        <Card className="bg-amber-50/50 dark:bg-[#17111e]/20 border-amber-200 dark:border-amber-500/20 py-16 text-center rounded-2xl">
           <CardContent className="flex flex-col items-center justify-center p-8 max-w-md mx-auto">
             <BadgeAlert className="h-12 w-12 text-amber-500 mb-3" />
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No hay clientes aprobados</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{t('ops.no_approved_clients')}</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-              Para originar una operación financiera de factoraje, primero debes registrar y aprobar al menos un cliente en el sistema.
+              {t('ops.no_approved_sub')}
             </p>
             <Link href="/clientes">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-                Ir a Directorio de Clientes
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl">
+                {t('ops.go_to_clients')}
               </Button>
             </Link>
           </CardContent>
@@ -227,24 +229,24 @@ function NewOperationForm() {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Configuración de Origen (Cliente y Fecha) */}
-            <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 shadow-xs">
-              <CardHeader className="py-4 border-b border-slate-200 dark:border-[#1e293b]/20">
-                <CardTitle className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                  Configuración del Origen
+            <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md rounded-2xl">
+              <CardHeader className="py-4 border-b border-slate-200 dark:border-[#1e293b]/40">
+                <CardTitle className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  {t('ops.config_title')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Selector de Cliente */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Cliente (Solo Aprobados)
+                  <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {t('ops.select_client')}
                   </label>
                   <select
                     {...register('clientId')}
-                    className="w-full bg-slate-50 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/40 rounded-lg p-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full bg-slate-50 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/60 rounded-xl p-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
                   >
-                    <option value="">-- Selecciona un Cliente --</option>
+                    <option value="">{t('ops.select_client_placeholder')}</option>
                     {approvedClients.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name} ({c.rfc})
@@ -258,13 +260,13 @@ function NewOperationForm() {
 
                 {/* Fecha de la Solicitud */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                    Fecha de la Solicitud
+                    {t('ops.req_date')}
                   </label>
                   <Input
                     type="date"
-                    className="bg-slate-50 dark:bg-[#111625] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 focus-visible:ring-blue-500"
+                    className="bg-slate-50 dark:bg-[#111625] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs rounded-xl"
                     {...register('requestDate')}
                   />
                   {errors.requestDate && (
@@ -276,15 +278,15 @@ function NewOperationForm() {
             </Card>
 
             {/* Lote de Facturas Dinámico */}
-            <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 shadow-xs">
-              <CardHeader className="py-4 border-b border-slate-200 dark:border-[#1e293b]/20 flex flex-row items-center justify-between">
+            <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md rounded-2xl">
+              <CardHeader className="py-4 border-b border-slate-200 dark:border-[#1e293b]/40 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <CardTitle className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                     <FileSpreadsheet className="h-4 w-4 text-blue-500" />
-                    Lote de Facturas
+                    {t('ops.batch_title')}
                   </CardTitle>
                   <CardDescription className="text-xs text-slate-500 mt-1">
-                    Carga los folios, RFC deudor, importes y fechas de vencimiento de las facturas.
+                    {t('ops.batch_sub')}
                   </CardDescription>
                 </div>
                 <Button
@@ -300,10 +302,10 @@ function NewOperationForm() {
                       dueDate: '',
                     })
                   }
-                  className="bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-600/20 border border-blue-200 dark:border-blue-500/30 font-semibold text-xs gap-1.5"
+                  className="bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-600/20 border border-blue-200 dark:border-blue-500/30 font-semibold text-xs gap-1.5 rounded-xl"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Añadir Fila
+                  {t('ops.add_row')}
                 </Button>
               </CardHeader>
               
@@ -311,10 +313,7 @@ function NewOperationForm() {
                 
                 {fields.map((field, index) => {
                   const itemErrors = errors.invoices?.[index];
-                  
-                  // Calcular días restantes de vencimiento para visualización reactiva
                   const invDueDate = watchInvoices[index]?.dueDate;
-                  const invIssueDate = watchInvoices[index]?.issueDate;
                   const daysRemaining =
                     invDueDate && watchRequestDate
                       ? getRemainingDays(new Date(watchRequestDate), new Date(invDueDate))
@@ -323,33 +322,30 @@ function NewOperationForm() {
                   return (
                     <div
                       key={field.id}
-                      className="bg-slate-50/70 dark:bg-[#111625]/40 border border-slate-200 dark:border-[#1e293b]/20 rounded-xl p-4 space-y-4 relative hover:border-slate-300 dark:hover:border-slate-700/50 transition-colors"
+                      className="bg-slate-50/70 dark:bg-[#111625]/40 border border-slate-200 dark:border-[#1e293b]/40 rounded-xl p-4 space-y-4 relative hover:border-slate-300 dark:hover:border-slate-700/50 transition-colors"
                     >
-                      {/* Cabecera de Fila */}
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-500 uppercase">Factura #{index + 1}</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase">{t('ops.invoice_num')} #{index + 1}</span>
                         {fields.length > 1 && (
                           <Button
                             type="button"
                             size="icon-sm"
                             variant="ghost"
                             onClick={() => remove(index)}
-                            className="text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 h-7 w-7"
+                            className="text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 h-7 w-7 rounded-lg"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
 
-                      {/* Campos Fila */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         
-                        {/* Folio */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Folio</label>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.folio')}</label>
                           <Input
                             placeholder="e.g. FAC-001"
-                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs uppercase"
+                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs uppercase rounded-xl"
                             {...register(`invoices.${index}.folio`)}
                           />
                           {itemErrors?.folio && (
@@ -357,12 +353,11 @@ function NewOperationForm() {
                           )}
                         </div>
 
-                        {/* RFC Deudor */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">RFC Deudor</label>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.debtor_rfc')}</label>
                           <Input
                             placeholder="e.g. DEF020202ABC"
-                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs uppercase"
+                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs uppercase rounded-xl"
                             {...register(`invoices.${index}.debtorRfc`)}
                           />
                           {itemErrors?.debtorRfc && (
@@ -370,12 +365,11 @@ function NewOperationForm() {
                           )}
                         </div>
 
-                        {/* Razón Social Deudor */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Razón Social Deudor</label>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.debtor_name')}</label>
                           <Input
                             placeholder="e.g. Distribuidora S.A."
-                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs"
+                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs rounded-xl"
                             {...register(`invoices.${index}.debtorName`)}
                           />
                           {itemErrors?.debtorName && (
@@ -383,14 +377,13 @@ function NewOperationForm() {
                           )}
                         </div>
 
-                        {/* Importe (Monto) */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Monto Factura (MXN)</label>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.invoice_amount')}</label>
                           <Input
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs font-mono"
+                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs font-mono rounded-xl"
                             {...register(`invoices.${index}.amount`, { valueAsNumber: true })}
                           />
                           {itemErrors?.amount && (
@@ -398,12 +391,11 @@ function NewOperationForm() {
                           )}
                         </div>
 
-                        {/* Fecha de Emisión */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Fecha Emisión</label>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.issue_date')}</label>
                           <Input
                             type="date"
-                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 text-xs"
+                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs rounded-xl"
                             {...register(`invoices.${index}.issueDate`)}
                           />
                           {itemErrors?.issueDate && (
@@ -411,16 +403,14 @@ function NewOperationForm() {
                           )}
                         </div>
 
-                        {/* Fecha de Vencimiento */}
                         <div className="space-y-1">
-                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Fecha Vencimiento</label>
+                          <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.due_date')}</label>
                           <Input
                             type="date"
-                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 text-xs"
+                            className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 text-xs rounded-xl"
                             {...register(`invoices.${index}.dueDate`)}
                           />
                           
-                          {/* Visualización del plazo restante en tiempo real */}
                           {daysRemaining !== null && !isNaN(daysRemaining) && (
                             <div className="flex items-center gap-1 mt-1">
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -428,7 +418,7 @@ function NewOperationForm() {
                                   ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                                   : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                               }`}>
-                                Plazo: {daysRemaining} días {daysRemaining >= 15 && daysRemaining <= 120 ? '✅' : '❌'}
+                                {t('ops.term')}: {daysRemaining} {language === 'en' ? 'days' : 'días'} {daysRemaining >= 15 && daysRemaining <= 120 ? '✅' : '❌'}
                               </span>
                             </div>
                           )}
@@ -449,91 +439,82 @@ function NewOperationForm() {
 
           {/* Lado Derecho: Resumen Financiero Lateral (SaaS) */}
           <div className="space-y-6">
-            <Card className="bg-white dark:bg-[#0a0d16] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 sticky top-24 shadow-xl">
+            <Card className="bg-white dark:bg-[#0a0d16] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 sticky top-24 shadow-xl rounded-2xl">
               <CardHeader className="py-4 border-b border-slate-200 dark:border-[#1e293b]/40 bg-slate-50 dark:bg-[#0c111e]">
                 <CardTitle className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                   <ShieldAlert className="h-4 w-4 text-blue-500 dark:text-blue-400 animate-pulse" />
-                  Resumen de Originación
+                  {t('ops.summary_title')}
                 </CardTitle>
                 <CardDescription className="text-[10px] text-slate-500">
-                  Desglose financiero en tiempo real calculado bajo reglas de Capital X.
+                  {t('ops.summary_sub')}
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="pt-6 space-y-6">
                 
-                {/* Desglose de Operación */}
                 <div className="space-y-4 text-sm">
                   
-                  {/* Total del Lote */}
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 dark:text-slate-400">Total Facturado</span>
+                    <span className="text-slate-500 dark:text-slate-400">{t('ops.total_invoiced')}</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-white">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(totalAmount)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(totalAmount)}
                     </span>
                   </div>
 
-                  {/* Aforo (85%) */}
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-slate-500 dark:text-slate-400">Monto Adelantado</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500">Aforo Fijo del 85.0%</span>
+                      <span className="text-slate-500 dark:text-slate-400">{t('ops.advanced_amount')}</span>
                     </div>
                     <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(advancedAmount)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(advancedAmount)}
                     </span>
                   </div>
 
-                  {/* Comisión (1.5%) */}
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-slate-500 dark:text-slate-400">Comisión por Servicio</span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500">Comisión Fija del 1.5%</span>
+                      <span className="text-slate-500 dark:text-slate-400">{t('ops.service_fee')}</span>
                     </div>
                     <span className="font-mono font-semibold text-slate-500 dark:text-slate-400">
-                      -{new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(commission)}
+                      -{new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(commission)}
                     </span>
                   </div>
 
                   <div className="h-px bg-slate-200 dark:bg-[#1e293b]/40"></div>
 
-                  {/* Depósito Neto Recibido */}
                   <div className="bg-emerald-50/50 dark:bg-[#111726]/60 border border-emerald-200 dark:border-blue-500/10 rounded-xl p-4 space-y-1">
-                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">Total a Depositar</span>
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">{t('ops.total_disbursed')}</span>
                     <span className="font-mono font-black text-xl text-emerald-600 dark:text-emerald-400 block tracking-tighter">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(depositAmount)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(depositAmount)}
                     </span>
                     <span className="text-[9px] text-slate-500 block leading-tight">
-                      Monto neto resultante tras la retención de aforo y el cobro de la comisión de factoraje.
+                      {t('ops.disbursed_sub')}
                     </span>
                   </div>
 
                 </div>
 
-                {/* Mensaje de validación rápida antes de enviar */}
                 {!selectedClientId && (
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 flex items-start gap-2 text-[10px] text-slate-600 dark:text-slate-400 leading-normal">
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-2.5 flex items-start gap-2 text-[10px] text-slate-600 dark:text-slate-400 leading-normal">
                     <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <span>Debes seleccionar un cliente aprobado para poder originar la operación.</span>
+                    <span>{t('ops.must_select_client')}</span>
                   </div>
                 )}
 
-                {/* Acciones del Analista */}
                 <div className="space-y-3 pt-2">
                   <Button
                     type="submit"
                     disabled={!isValid || createOperationMutation.isPending || !selectedClientId}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-lg shadow-lg text-xs uppercase tracking-wider transition-all duration-200"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-5 rounded-xl shadow-lg text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer"
                   >
-                    {createOperationMutation.isPending ? 'Procesando Originación...' : 'Confirmar y Originar Lote'}
+                    {createOperationMutation.isPending ? t('ops.processing') : t('ops.confirm_origination')}
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => router.push('/operaciones')}
-                    className="w-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40 text-xs py-5"
+                    className="w-full text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40 text-xs py-5 rounded-xl"
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                 </div>
 
@@ -552,7 +533,7 @@ export default function NewOperationPage() {
     <Suspense fallback={
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-        <p className="text-sm text-slate-400">Iniciando asistente de originación...</p>
+        <p className="text-sm text-slate-400">Loading...</p>
       </div>
     }>
       <NewOperationForm />

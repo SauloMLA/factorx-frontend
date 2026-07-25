@@ -111,7 +111,7 @@ export default function DashboardPage() {
               {t('dash.volume_trend')}
             </CardTitle>
             <CardDescription className="text-slate-500 dark:text-slate-400 text-xs">
-              Monto total originado por mes.
+              {t('dash.volume_sub')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -128,14 +128,14 @@ export default function DashboardPage() {
                 {t('dash.client_growth')}
               </CardTitle>
               <CardDescription className="text-slate-500 dark:text-slate-400 text-xs">
-                Clientes aprobados por mes en la plataforma.
+                {t('dash.growth_sub')}
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             {charts.clientsByMonth.length === 0 ? (
               <div className="py-16 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
-                No hay datos de clientes registrados aún.
+                {t('dash.growth_empty')}
               </div>
             ) : (
               <div className="overflow-hidden border border-slate-200 dark:border-[#1e293b]/40 rounded-xl">

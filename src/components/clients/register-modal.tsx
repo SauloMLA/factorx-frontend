@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 import { useRegisterClientMutation } from '@/hooks/useClients';
+import { useLanguage } from '@/context/language-context';
 
 import {
   Dialog,
@@ -19,17 +20,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// Esquema de validación en base a las invariantes de FactorCore
 const registerClientSchema = z.object({
   rfc: z
     .string()
-    .min(1, 'El RFC es obligatorio')
+    .min(1, 'RFC required')
     .regex(
       /^[A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}$/i,
-      'Debe ser un RFC válido de Persona Moral en México (12 caracteres alfanuméricos)'
+      'Valid Mexican Corporate RFC required (12 chars)'
     ),
-  name: z.string().min(3, 'La Razón Social debe tener al menos 3 caracteres'),
-  email: z.string().min(1, 'El correo electrónico es obligatorio').email('Formato de correo electrónico inválido'),
+  name: z.string().min(3, 'At least 3 characters required'),
+  email: z.string().min(1, 'Email required').email('Invalid email format'),
 });
 
 type RegisterClientFormValues = z.infer<typeof registerClientSchema>;
@@ -37,6 +37,7 @@ type RegisterClientFormValues = z.infer<typeof registerClientSchema>;
 export default function RegisterClientModal() {
   const [open, setOpen] = useState(false);
   const registerMutation = useRegisterClientMutation();
+  const { t, language } = useLanguage();
 
   const {
     register,
@@ -61,15 +62,15 @@ export default function RegisterClientModal() {
       },
       {
         onSuccess: (data) => {
-          toast.success('Cliente registrado exitosamente', {
-            description: `Se ha registrado el cliente con ID: ${data.id.substring(0, 8)}...`,
+          toast.success(t('clients.btn_register'), {
+            description: `ID: ${data.id.substring(0, 8)}...`,
           });
           reset();
           setOpen(false);
         },
         onError: (error: any) => {
-          toast.error('Error al registrar cliente', {
-            description: error.message || 'Verifica los datos e inténtalo de nuevo.',
+          toast.error('Error', {
+            description: error.message || 'Error',
           });
         },
       }
@@ -79,62 +80,64 @@ export default function RegisterClientModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium gap-2">
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold gap-2 rounded-xl shadow-md shadow-blue-500/20 cursor-pointer">
           <Plus className="h-4 w-4" />
-          Registrar Cliente
+          {t('clients.btn_register')}
         </Button>
       } />
-      <DialogContent className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 sm:max-w-[425px]">
+      <DialogContent className="bg-white dark:bg-[#0f1422] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 sm:max-w-[425px] rounded-2xl shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 dark:text-white text-lg">Registrar Cliente</DialogTitle>
-          <DialogDescription className="text-slate-500 dark:text-slate-400">
-            Ingresa los datos fiscales de la empresa. Todo cliente inicia en estado pendiente y requerirá aprobación para originar operaciones.
+          <DialogTitle className="text-slate-900 dark:text-white text-lg font-bold">{t('clients.btn_register')}</DialogTitle>
+          <DialogDescription className="text-slate-500 dark:text-slate-400 text-xs">
+            {language === 'en'
+              ? 'Enter corporate tax details. Every client starts in pending status and requires analyst approval.'
+              : 'Ingresa los datos fiscales de la empresa. Todo cliente inicia en estado pendiente y requerirá aprobación para originar operaciones.'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              RFC (Persona Moral)
+            <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {t('clients.col_rfc')} (12 Chars)
             </label>
             <Input
               id="rfc"
               placeholder="e.g. CAP220101XYZ"
-              className="bg-slate-50 dark:bg-[#171e30] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus-visible:ring-blue-500 uppercase"
+              className="bg-slate-50 dark:bg-[#171e30] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs font-mono uppercase rounded-xl"
               {...register('rfc')}
             />
             {errors.rfc && (
-              <p className="text-xs text-rose-500 dark:text-rose-400 font-medium">{errors.rfc.message}</p>
+              <p className="text-[10px] text-rose-500 dark:text-rose-400 font-medium">{errors.rfc.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Razón Social / Nombre Legal
+            <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {t('clients.col_name')}
             </label>
             <Input
               id="name"
               placeholder="e.g. Capital Partner S.A."
-              className="bg-slate-50 dark:bg-[#171e30] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus-visible:ring-blue-500"
+              className="bg-slate-50 dark:bg-[#171e30] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs rounded-xl"
               {...register('name')}
             />
             {errors.name && (
-              <p className="text-xs text-rose-500 dark:text-rose-400 font-medium">{errors.name.message}</p>
+              <p className="text-[10px] text-rose-500 dark:text-rose-400 font-medium">{errors.name.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Correo Electrónico
+            <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              {t('clients.col_email')}
             </label>
             <Input
               id="email"
               type="email"
               placeholder="e.g. partner@capital.mx"
-              className="bg-slate-50 dark:bg-[#171e30] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus-visible:ring-blue-500"
+              className="bg-slate-50 dark:bg-[#171e30] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 text-xs font-mono rounded-xl"
               {...register('email')}
             />
             {errors.email && (
-              <p className="text-xs text-rose-500 dark:text-rose-400 font-medium">{errors.email.message}</p>
+              <p className="text-[10px] text-rose-500 dark:text-rose-400 font-medium">{errors.email.message}</p>
             )}
           </div>
 
@@ -146,16 +149,16 @@ export default function RegisterClientModal() {
                 reset();
                 setOpen(false);
               }}
-              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40"
+              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40 text-xs rounded-xl"
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               disabled={registerMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
+              className="bg-blue-600 hover:bg-blue-700 text-white min-w-[100px] text-xs font-semibold rounded-xl cursor-pointer"
             >
-              {registerMutation.isPending ? 'Registrando...' : 'Registrar'}
+              {registerMutation.isPending ? t('common.loading') : t('clients.btn_register')}
             </Button>
           </div>
         </form>

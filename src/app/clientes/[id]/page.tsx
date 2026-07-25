@@ -11,6 +11,7 @@ import ApproveClientDialog from '@/components/clients/approve-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useLanguage } from '@/context/language-context';
 
 interface ClientDetailPageProps {
   params: Promise<{ id: string }>;
@@ -18,14 +19,10 @@ interface ClientDetailPageProps {
 
 export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = use(params);
+  const { t, language } = useLanguage();
 
-  // Consultar información básica del cliente desde BFF
   const { data: client, isLoading: isClientLoading, isError: isClientError } = useClientDetailsQuery(id);
-
-  // Consultar resumen ejecutivo desde el backend NestJS
   const { data: summary, isLoading: isSummaryLoading } = useClientSummaryQuery(id, client?.status === 'APPROVED');
-
-  // Consultar historial de operaciones desde BFF
   const { data: operations, isLoading: isOperationsLoading } = useOperationsQuery(id);
 
   const handleExportClientReport = () => {
@@ -53,11 +50,13 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
     });
   };
 
+  const locale = language === 'en' ? 'en-US' : 'es-MX';
+
   if (isClientLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-        <p className="text-sm text-slate-400">Cargando expediente del cliente...</p>
+        <p className="text-sm text-slate-400">{t('common.loading')}</p>
       </div>
     );
   }
@@ -67,10 +66,10 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
       <div className="text-center py-16">
         <AlertTriangle className="h-12 w-12 text-rose-500 mx-auto mb-3" />
         <h3 className="text-lg font-bold text-white mb-2">Expediente no encontrado</h3>
-        <p className="text-sm text-slate-400 mb-6">El cliente solicitado no existe en la base de datos.</p>
+        <p className="text-sm text-slate-400 mb-6">El cliente solicitado no existe.</p>
         <Link href="/clientes">
-          <Button variant="outline" className="border-[#1e293b] text-slate-300 gap-2">
-            <ArrowLeft className="h-4 w-4" /> Volver a Clientes
+          <Button variant="outline" className="border-[#1e293b] text-slate-300 gap-2 rounded-xl">
+            <ArrowLeft className="h-4 w-4" /> {t('client_detail.back')}
           </Button>
         </Link>
       </div>
@@ -78,22 +77,22 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
       {/* Cabecera y Navegación de Regreso */}
       <div className="space-y-4">
         <Link href="/clientes" className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
-          <ArrowLeft className="h-3.5 w-3.5" /> Volver a Directorio
+          <ArrowLeft className="h-3.5 w-3.5" /> {t('client_detail.back')}
         </Link>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 dark:border-[#1e293b]/40 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 dark:border-[#1e293b]/60 pb-5">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{client.name}</h1>
               <ClientStatusBadge status={client.status} />
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium">
-              <span>RFC: <span className="font-mono text-slate-800 dark:text-slate-300">{client.rfc}</span></span>
+              <span>{t('clients.col_rfc')}: <span className="font-mono text-slate-800 dark:text-slate-300">{client.rfc}</span></span>
               <span>•</span>
-              <span>Contacto: <span className="text-slate-800 dark:text-slate-300">{client.email}</span></span>
+              <span>{t('clients.col_email')}: <span className="text-slate-800 dark:text-slate-300 font-mono">{client.email}</span></span>
             </div>
           </div>
 
@@ -103,9 +102,9 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
               <Button
                 onClick={handleExportClientReport}
                 variant="outline"
-                className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 gap-2 text-xs"
+                className="border-slate-300 dark:border-[#1e293b]/60 text-slate-700 dark:text-slate-300 gap-2 text-xs rounded-xl"
               >
-                <Download className="h-4 w-4" /> Exportar Reporte CSV
+                <Download className="h-4 w-4" /> {t('client_detail.export_csv')}
               </Button>
             )}
 
@@ -115,15 +114,15 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                 clientName={client.name}
                 clientRfc={client.rfc}
                 trigger={
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-semibold">
-                    <ShieldCheck className="h-4 w-4" /> Aprobar Cliente
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-semibold rounded-xl shadow-md shadow-emerald-500/20">
+                    <ShieldCheck className="h-4 w-4" /> {t('clients.approve_btn')}
                   </Button>
                 }
               />
             ) : (
               <Link href={`/operaciones/nueva?clientId=${client.id}`}>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2 font-semibold">
-                  <Plus className="h-4 w-4" /> Nueva Originación
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2 font-semibold rounded-xl shadow-md shadow-blue-500/20">
+                  <Plus className="h-4 w-4" /> {t('ops.btn_new')}
                 </Button>
               </Link>
             )}
@@ -133,12 +132,12 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
 
       {/* Banner de Advertencia si está Pendiente */}
       {client.status === 'PENDING' && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex gap-3 text-slate-700 dark:text-slate-300 text-sm">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex gap-3 text-slate-700 dark:text-slate-300 text-sm">
           <AlertTriangle className="h-5 w-5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-amber-600 dark:text-amber-400">Cliente pendiente de aprobación</p>
+            <p className="font-semibold text-amber-600 dark:text-amber-400">{t('client_detail.pending_banner_title')}</p>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-              Este cliente se encuentra en la etapa de alta en la mesa de control. No podrá originar operaciones financieras ni cargar facturas hasta ser aprobado por un analista.
+              {t('client_detail.pending_banner_desc')}
             </p>
           </div>
         </div>
@@ -147,13 +146,13 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
       {/* KPIs del Expediente Financiero (Solo si está Aprobado) */}
       {client.status === 'APPROVED' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-white dark:bg-[#111625] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 shadow-xs">
+          <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md rounded-2xl">
             <CardContent className="pt-6 flex items-start gap-4">
-              <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400">
+              <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">
                 <Layers className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Operaciones Fondeadas</p>
+                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('client_detail.funded_ops')}</p>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
                   {isSummaryLoading ? '...' : summary?.operationCount ?? 0}
                 </h3>
@@ -161,17 +160,17 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-[#111625] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 shadow-xs">
+          <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md rounded-2xl">
             <CardContent className="pt-6 flex items-start gap-4">
-              <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-600/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+              <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-600/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
                 <CreditCard className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Volumen Adelantado</p>
+                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('client_detail.advanced_vol')}</p>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 font-mono">
                   {isSummaryLoading
                     ? '...'
-                    : new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
+                    : new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(
                         summary?.totalAdvancedAmount ?? 0
                       )}
                 </h3>
@@ -179,23 +178,23 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-[#111625] border-slate-200 dark:border-[#1e293b]/40 text-slate-800 dark:text-slate-200 shadow-xs">
+          <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md rounded-2xl">
             <CardContent className="pt-6 flex items-start gap-4">
-              <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-600/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+              <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-600/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shrink-0">
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Próximo Vencimiento</p>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-2">
+                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{t('client_detail.next_due')}</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-2 font-mono">
                   {isSummaryLoading
                     ? '...'
                     : summary?.nearestDueDate
-                    ? new Date(summary.nearestDueDate).toLocaleDateString('es-MX', {
+                    ? new Date(summary.nearestDueDate).toLocaleDateString(locale, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
                       })
-                    : 'Sin vencimientos'}
+                    : t('client_detail.no_due')}
                 </h3>
               </div>
             </CardContent>
@@ -205,41 +204,38 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
 
       {/* Historial de Operaciones */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Historial de Operaciones</h2>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('client_detail.ops_history')}</h2>
         
         {isOperationsLoading ? (
-          <div className="py-10 text-center text-sm text-slate-500">Cargando operaciones...</div>
+          <div className="py-10 text-center text-sm text-slate-500">{t('common.loading')}</div>
         ) : !operations || operations.length === 0 ? (
-          <Card className="bg-slate-50 dark:bg-[#111625]/20 border-slate-200 dark:border-[#1e293b]/40 py-12 text-center">
+          <Card className="bg-slate-50 dark:bg-[#111625]/20 border-slate-200 dark:border-[#1e293b]/60 py-12 text-center rounded-2xl">
             <CardContent>
-              <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">No hay operaciones registradas para este cliente</p>
-              {client.status === 'APPROVED' && (
-                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Haz clic en Nueva Originación para fondear sus primeras facturas.</p>
-              )}
+              <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">{t('client_detail.no_ops')}</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="border border-slate-200 dark:border-[#1e293b]/40 rounded-xl overflow-hidden bg-white dark:bg-[#0d121f] shadow-xs">
+          <div className="border border-slate-200 dark:border-[#1e293b]/60 rounded-2xl overflow-hidden bg-white dark:bg-[#0c101a] shadow-xl">
             <Table>
-              <TableHeader className="bg-slate-50 dark:bg-[#111625] border-b border-slate-200 dark:border-[#1e293b]/40">
-                <TableRow className="border-b border-slate-200 dark:border-[#1e293b]/40 hover:bg-transparent">
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">ID Operación</TableHead>
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">Fecha</TableHead>
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">Facturas</TableHead>
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">Total Facturado</TableHead>
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">Monto Adelantado (85%)</TableHead>
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">Comisión (1.5%)</TableHead>
-                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5 text-right">Neto a Depositar</TableHead>
+              <TableHeader className="bg-slate-100/80 dark:bg-[#111625] border-b border-slate-200 dark:border-[#1e293b]/60">
+                <TableRow className="border-b border-slate-200 dark:border-[#1e293b]/60 hover:bg-transparent">
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">{t('ops.col_id')}</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">{t('ops.col_date')}</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">{t('ops.col_invoices')}</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">{t('ops.col_total')}</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">{t('ops.col_advanced')}</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5">{t('ops.col_commission')}</TableHead>
+                  <TableHead className="text-slate-600 dark:text-slate-400 font-semibold py-3.5 text-right">{t('ops.col_deposit')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {operations.map((op) => (
-                  <TableRow key={op.id} className="border-b border-slate-100 dark:border-[#1e293b]/20 hover:bg-slate-50 dark:hover:bg-[#1e293b]/10 transition-colors">
+                  <TableRow key={op.id} className="border-b border-slate-100 dark:border-[#1e293b]/20 hover:bg-slate-50 dark:hover:bg-[#1e293b]/20 transition-colors">
                     <TableCell className="font-mono text-xs text-slate-500 dark:text-slate-400 py-3.5">
                       {op.id}
                     </TableCell>
-                    <TableCell className="text-slate-700 dark:text-slate-300 py-3.5 text-sm">
-                      {new Date(op.createdAt).toLocaleDateString('es-MX', {
+                    <TableCell className="text-slate-700 dark:text-slate-300 py-3.5 text-sm font-mono">
+                      {new Date(op.createdAt).toLocaleDateString(locale, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
@@ -247,16 +243,16 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                     </TableCell>
                     <TableCell className="text-slate-700 dark:text-slate-300 py-3.5 font-medium">{op.invoices?.length ?? 0}</TableCell>
                     <TableCell className="font-mono text-slate-700 dark:text-slate-300 py-3.5">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(op.totalAmount)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(op.totalAmount)}
                     </TableCell>
                     <TableCell className="font-mono text-blue-600 dark:text-blue-400 py-3.5">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(op.advancedAmount)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(op.advancedAmount)}
                     </TableCell>
                     <TableCell className="font-mono text-slate-500 dark:text-slate-400 py-3.5">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(op.commission)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(op.commission)}
                     </TableCell>
                     <TableCell className="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-right py-3.5">
-                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(op.depositAmount)}
+                      {new Intl.NumberFormat(locale, { style: 'currency', currency: 'MXN' }).format(op.depositAmount)}
                     </TableCell>
                   </TableRow>
                 ))}
