@@ -6,6 +6,7 @@ import { Search, User, Bell, LogOut, Shield } from 'lucide-react';
 import { clientService } from '@/services/client.service';
 import { useQuery } from '@tanstack/react-query';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationDropdown } from '@/components/layout/notification-dropdown';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -99,24 +100,8 @@ export default function Header() {
         {/* Toggle de Modo Claro / Oscuro */}
         <ThemeToggle />
 
-        <Popover>
-          <PopoverTrigger className="p-2 rounded-lg bg-slate-100 dark:bg-[#111625] border border-slate-200 dark:border-[#1e293b]/40 hover:bg-slate-200 dark:hover:bg-[#1e293b]/20 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-150 relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 bg-blue-500 rounded-full"></span>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 p-0 overflow-hidden bg-white/95 dark:bg-[#0f1422]/95 backdrop-blur-md border border-slate-200 dark:border-[#1e293b]/60 shadow-xl shadow-slate-200/20 dark:shadow-black/40">
-            <div className="p-4 border-b border-slate-100 dark:border-[#1e293b]/40 bg-slate-50/50 dark:bg-[#111625]/50">
-              <h4 className="font-semibold text-slate-800 dark:text-slate-200">Notificaciones</h4>
-            </div>
-            <div className="p-8 text-center flex flex-col items-center justify-center">
-              <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-[#1e293b]/40 flex items-center justify-center mb-3">
-                <Bell className="h-5 w-5 text-slate-400 dark:text-slate-500" />
-              </div>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Estás al día</p>
-              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">No hay notificaciones recientes.</p>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {/* Notificaciones del Sistema */}
+        <NotificationDropdown />
 
         <div className="h-8 w-px bg-slate-200 dark:bg-[#1e293b]/40 mx-1"></div>
 

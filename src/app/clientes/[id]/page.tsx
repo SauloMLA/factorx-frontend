@@ -2,9 +2,10 @@
 
 import { use } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, ShieldCheck, AlertTriangle, Calendar, CreditCard, Layers } from 'lucide-react';
+import { ArrowLeft, Plus, ShieldCheck, AlertTriangle, Calendar, CreditCard, Layers, Download } from 'lucide-react';
 import { useClientDetailsQuery, useClientSummaryQuery } from '@/hooks/useClients';
 import { useOperationsQuery } from '@/hooks/useOperations';
+import { exportToCSV } from '@/lib/export-csv';
 import ClientStatusBadge from '@/components/clients/status-badge';
 import ApproveClientDialog from '@/components/clients/approve-dialog';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,31 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
 
   // Consultar historial de operaciones desde BFF
   const { data: operations, isLoading: isOperationsLoading } = useOperationsQuery(id);
+
+  const handleExportClientReport = () => {
+    if (!client || !operations || operations.length === 0) return;
+    const reportData = operations.map((op) => ({
+      clienteRfc: client.rfc,
+      clienteNombre: client.name,
+      idOperacion: op.id,
+      montoTotalFacturas: op.totalAmount,
+      montoAnticipado: op.advancedAmount,
+      comision: op.commission,
+      montoDepositado: op.depositAmount,
+      fechaOriginacion: new Date(op.createdAt).toISOString(),
+    }));
+
+    exportToCSV(reportData, `expediente_${client.rfc}`, {
+      clienteRfc: 'RFC Cliente',
+      clienteNombre: 'Razón Social',
+      idOperacion: 'ID Operación',
+      montoTotalFacturas: 'Total Facturado',
+      montoAnticipado: 'Anticipado (85%)',
+      comision: 'Comisión (1.5%)',
+      montoDepositado: 'Depositado Neto',
+      fechaOriginacion: 'Fecha de Originación',
+    });
+  };
 
   if (isClientLoading) {
     return (
@@ -73,6 +99,16 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
 
           {/* Acciones Rápidas */}
           <div className="flex items-center gap-3">
+            {client.status === 'APPROVED' && operations && operations.length > 0 && (
+              <Button
+                onClick={handleExportClientReport}
+                variant="outline"
+                className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 gap-2 text-xs"
+              >
+                <Download className="h-4 w-4" /> Exportar Reporte CSV
+              </Button>
+            )}
+
             {client.status === 'PENDING' ? (
               <ApproveClientDialog
                 clientId={client.id}

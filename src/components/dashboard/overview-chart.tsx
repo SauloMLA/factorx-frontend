@@ -46,11 +46,11 @@ export function OverviewChart({ data }: { data: any[] }) {
             color: '#fff',
           }}
           itemStyle={{ color: '#fff' }}
-          formatter={(value: number) => [
+          formatter={(value: any) => [
             new Intl.NumberFormat('es-MX', {
               style: 'currency',
               currency: 'MXN',
-            }).format(value),
+            }).format(Number(value || 0)),
             'Monto',
           ]}
         />

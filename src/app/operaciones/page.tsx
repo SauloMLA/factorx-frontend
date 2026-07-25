@@ -2,9 +2,10 @@
 
 import { useState, Fragment } from 'react';
 import Link from 'next/link';
-import { Plus, Search, FileText, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Plus, Search, FileText, ChevronDown, ChevronUp, AlertCircle, Download } from 'lucide-react';
 import { useOperationsQuery } from '@/hooks/useOperations';
 import { useClientsQuery } from '@/hooks/useClients';
+import { exportToCSV } from '@/lib/export-csv';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -18,6 +19,34 @@ export default function OperationsPage() {
 
   const toggleExpand = (opId: string) => {
     setExpandedOperationId(expandedOperationId === opId ? null : opId);
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredOperations || filteredOperations.length === 0) return;
+    const exportData = filteredOperations.map((op) => {
+      const client = (clients || []).find((c) => c.id === op.clientId);
+      return {
+        id: op.id,
+        clienteNombre: client?.name || 'Desconocido',
+        clienteRfc: client?.rfc || 'Desconocido',
+        montoTotal: op.totalAmount,
+        montoAdelantado: op.advancedAmount,
+        comision: op.commission,
+        montoDepositado: op.depositAmount,
+        fecha: new Date(op.createdAt).toISOString(),
+      };
+    });
+
+    exportToCSV(exportData, 'operaciones_factoraje', {
+      id: 'ID Operación',
+      clienteNombre: 'Razón Social Cliente',
+      clienteRfc: 'RFC Cliente',
+      montoTotal: 'Monto Total Facturas',
+      montoAdelantado: 'Monto Anticipado (85%)',
+      comision: 'Comisión (1.5%)',
+      montoDepositado: 'Monto Depositado Neto',
+      fecha: 'Fecha de Originación',
+    });
   };
 
   if (isLoading) {
@@ -62,12 +91,23 @@ export default function OperationsPage() {
             Registro global y auditoría de todas las originaciones de factoraje realizadas.
           </p>
         </div>
-        <Link href="/operaciones/nueva">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium gap-2">
-            <Plus className="h-4 w-4" />
-            Nueva Originación
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleExportCSV}
+            disabled={filteredOperations.length === 0}
+            variant="outline"
+            className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
           </Button>
-        </Link>
+          <Link href="/operaciones/nueva">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium gap-2">
+              <Plus className="h-4 w-4" />
+              Nueva Originación
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Buscador reactivo */}
