@@ -1,36 +1,26 @@
-# FactorCore Web (FactorX Frontend) 2.0
+# FactorCore Web (FactorX Frontend)
 
-> Consola Web y Portal de Administración de Factoraje Corporativo para **Capital X**.
-
-**FactorCore Web** es la interfaz web del sistema **FactorCore**, construida para permitir a analistas financieros y empresas proveedoras gestionar el ciclo de vida completo de clientes, originación de operaciones, notificaciones y bitácora de auditoría inmutable.
+> **FactorCore Web** es la consola de administración ejecutiva y portal de originación de factoraje financiero para **Capital X**, construida con **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4** y arquitectura **Backend-For-Frontend (BFF)**.
 
 ---
 
-## 🚀 Módulos y Funcionalidades Nuevas
+## 🧠 El Problema y la Experiencia de Usuario (UX)
 
-1. **Bitácora de Auditoría (`/auditoria`)**:
-   - Registro inmutable de acciones del sistema (`CREATE`, `APPROVE`, etc.).
-   - Filtros dinámicos por Entidad y Acción.
-   - Restringido exclusivamente a usuarios con rol `ADMINISTRATOR`.
-2. **Centro de Notificaciones en Tiempo Real**:
-   - Campana interactiva en la barra superior con contador de notificaciones no leídas y refetch automático.
-   - Acción para marcar notificaciones como leídas.
-3. **Exportación de Datos a CSV (UTF-8)**:
-   - Descarga estandarizada en formato CSV con BOM (compatibilidad total con Excel).
-   - Botón de exportación en **Bitácora de Auditoría**, **Historial de Operaciones** y **Expediente de Cliente**.
-4. **Autenticación JWT & RBAC**:
-   - Manejo de sesiones seguras mediante cookies `HttpOnly` (`access_token` y `refresh_token`).
-   - Pantalla de inicio de sesión dividida ejecutiva con control de rutas protegidas.
+En las finanzas corporativas, los analistas y clientes necesitan visibilidad inmediata sobre su liquidez. **FactorCore Web** elimina la complejidad operativa permitiendo:
+1. **Originación Reactiva**: Validación en tiempo real del RFC, aforo del 85%, comisión del 1.5% y vigencia de facturas (15-120 días) antes de enviar la solicitud.
+2. **Control de Acceso por Roles (RBAC)**: Vistas ejecutivas como `/auditoria` y `/usuarios` restringidas dinámicamente según el rol (`ADMINISTRATOR` vs `OPERATOR`).
+3. **Alertas en Tiempo Real**: Centro de notificaciones en el encabezado con refetch automático.
+4. **Exportación de Reportes**: Generación instantánea de archivos **CSV UTF-8 (BOM)** para contabilidad y auditoría.
 
 ---
 
-## 🛠️ Tecnologías y Arquitectura
+## 🏛️ Patrón Backend-For-Frontend (BFF) & Bounded Contexts Consumidos
 
-* **Framework**: [Next.js 16 (App Router)](https://nextjs.org/) + Turbopack
-* **Biblioteca UI**: React 19 + Radix UI + Tailwind CSS v4
-* **Manejo de Estado & Caché API**: TanStack Query v5 (React Query)
-* **Iconos & Notificaciones**: Lucide React + Sonner
-* **Exportación**: Utilidad nativa UTF-8 `exportToCSV`
+La aplicación utiliza Next.js API Routes Proxy (`/app/api/*`) para consumir los Bounded Contexts del backend NestJS de forma transparente y segura:
+
+- **Auth Proxy (`/api/auth/*`)**: Setea cookies seguras `HttpOnly` (`access_token` y `refresh_token`).
+- **Audit Proxy (`/api/auditoria`)**: Reenvía peticiones con Bearer JWT al backend interno (`http://localhost:3005/audit`).
+- **Notifications Proxy (`/api/notifications`)**: Alertas del sistema.
 
 ---
 
@@ -38,12 +28,14 @@
 
 ```bash
 cd financial-app
-
-# Instalar dependencias
 npm install
-
-# Iniciar servidor de desarrollo (puerto 3001)
-npm run dev
+npm run dev   # Inicia en http://localhost:3001
 ```
 
-Abre **[http://localhost:3001](http://localhost:3001)** en tu navegador.
+---
+
+## 📚 Documentación Maestra del Sistema
+
+Para consultar el documento completo de diseño de arquitectura, ADRs y estrategias de seguridad:
+
+👉 **[TECHNICAL_DESIGN_DOCUMENT.md](../TECHNICAL_DESIGN_DOCUMENT.md)**
