@@ -48,10 +48,11 @@ export async function GET(req: NextRequest) {
     const response = NextResponse.json({ user: data, accessToken });
 
     if (accessToken) {
+      const isProd = process.env.NODE_ENV === 'production';
       response.cookies.set('access_token', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
         path: '/',
         maxAge: 15 * 60,
       });
