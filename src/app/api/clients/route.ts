@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005').replace(/\/$/, '');
 
+function getToken(req: NextRequest): string | undefined {
+  return (
+    req.cookies.get('access_token')?.value ||
+    req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+  );
+}
+
 export async function GET(req: NextRequest) {
   try {
-    const accessToken = req.cookies.get('access_token')?.value;
+    const accessToken = getToken(req);
 
     if (!accessToken) {
       return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
@@ -34,7 +41,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const accessToken = req.cookies.get('access_token')?.value;
+    const accessToken = getToken(req);
     const body = await req.json();
 
     const res = await fetch(`${API_URL}/clientes`, {

@@ -24,7 +24,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/auth/me');
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      const headers: Record<string, string> = {};
+      if (storedToken) {
+        headers['Authorization'] = `Bearer ${storedToken}`;
+      }
+
+      const res = await fetch('/api/auth/me', { headers, credentials: 'same-origin' });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
@@ -48,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify(credentials),
       });
 
@@ -57,6 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.error(data.message || 'Credenciales inválidas');
         setIsLoading(false);
         return false;
+      }
+
+      if (data.accessToken && typeof window !== 'undefined') {
+        localStorage.setItem('access_token', data.accessToken);
       }
 
       setUser(data.user);
@@ -75,7 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       setIsLoading(true);
-      await fetch('/api/auth/logout', { method: 'POST' });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token');
+      }
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
       setUser(null);
       toast.info('Sesión cerrada');
       router.push('/login');
