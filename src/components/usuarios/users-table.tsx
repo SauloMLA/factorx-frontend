@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Search, AlertCircle, Users, ShieldAlert, CheckCircle2, XCircle } from 'lucide-react';
-import { useUsersQuery } from '@/hooks/useUsers';
+import { useUsersQuery, User } from '@/hooks/useUsers';
 
 import {
   Table,
@@ -39,7 +39,7 @@ export default function UsersTable() {
     );
   }
 
-  const filteredUsers = (users || []).filter((user) => {
+  const filteredUsers = ((users as User[]) || []).filter((user: User) => {
     const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
     const matchesSearch =
       user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -63,10 +63,10 @@ export default function UsersTable() {
               Todos ({users?.length || 0})
             </TabsTrigger>
             <TabsTrigger value="ADMINISTRATOR">
-              Admins ({users?.filter(u => u.role === 'ADMINISTRATOR').length || 0})
+              Admins ({((users as User[]) || []).filter((u: User) => u.role === 'ADMINISTRATOR').length || 0})
             </TabsTrigger>
             <TabsTrigger value="OPERATOR">
-              Operadores ({users?.filter(u => u.role === 'OPERATOR').length || 0})
+              Operadores ({((users as User[]) || []).filter((u: User) => u.role === 'OPERATOR').length || 0})
             </TabsTrigger>
           </TabsList>
         </Tabs>

@@ -2,6 +2,8 @@
 
 import { useAuditLogs } from '@/hooks/useAuditLogs';
 import { useState } from 'react';
+import { exportToCSV } from '@/lib/export-csv';
+import { Download } from 'lucide-react';
 
 function formatDate(dateString: string) {
   try {
@@ -28,6 +30,20 @@ export function AuditTable() {
     action: actionFilter || undefined,
   });
 
+  const handleExportCSV = () => {
+    if (!logs || logs.length === 0) return;
+    exportToCSV(logs, 'bitacora_auditoria', {
+      id: 'ID Registro',
+      timestamp: 'Fecha',
+      performedBy: 'Usuario ID',
+      action: 'Acción',
+      entity: 'Entidad',
+      entityId: 'ID Entidad',
+      ip: 'Dirección IP',
+      userAgent: 'Navegador/UserAgent',
+    });
+  };
+
   if (isLoading) return <div className="p-4 text-slate-500 text-sm">Cargando bitácora de auditoría...</div>;
   if (error) {
     return (
@@ -45,21 +61,32 @@ export function AuditTable() {
 
   return (
     <div className="space-y-4">
-      <div className="flex space-x-4">
-        <input
-          type="text"
-          placeholder="Filtrar por Entidad (ej. Client)"
-          value={entityFilter}
-          onChange={(e) => setEntityFilter(e.target.value)}
-          className="border border-slate-300 rounded-md p-2"
-        />
-        <input
-          type="text"
-          placeholder="Filtrar por Acción (ej. CREATE)"
-          value={actionFilter}
-          onChange={(e) => setActionFilter(e.target.value)}
-          className="border border-slate-300 rounded-md p-2"
-        />
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-wrap space-x-4">
+          <input
+            type="text"
+            placeholder="Filtrar por Entidad (ej. Client)"
+            value={entityFilter}
+            onChange={(e) => setEntityFilter(e.target.value)}
+            className="border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            placeholder="Filtrar por Acción (ej. CREATE)"
+            value={actionFilter}
+            onChange={(e) => setActionFilter(e.target.value)}
+            className="border border-slate-300 dark:border-slate-700 dark:bg-slate-900 rounded-lg p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <button
+          onClick={handleExportCSV}
+          disabled={!logs || logs.length === 0}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white text-white text-xs font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50"
+        >
+          <Download className="w-4 h-4" />
+          Exportar a CSV
+        </button>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-slate-200">
