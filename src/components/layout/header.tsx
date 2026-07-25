@@ -6,6 +6,7 @@ import { Search, User, LogOut, Shield } from 'lucide-react';
 import { clientService } from '@/services/client.service';
 import { useQuery } from '@tanstack/react-query';
 import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { NotificationDropdown } from '@/components/layout/notification-dropdown';
 import { useLanguage } from '@/context/language-context';
 import {
@@ -92,10 +93,13 @@ export default function Header() {
         )}
       </div>
 
-      {/* Acciones: Toggle Idioma + Notificaciones + Perfil */}
-      <div className="flex items-center gap-3.5">
+      {/* Acciones: Toggle Idioma + Toggle Modo + Notificaciones + Perfil */}
+      <div className="flex items-center gap-3">
         {/* Toggle de Idioma (Español / Inglés) */}
         <LanguageToggle />
+
+        {/* Toggle de Tema (Modo Claro / Oscuro sin íconos) */}
+        <ThemeToggle />
 
         {/* Notificaciones del Sistema */}
         <NotificationDropdown />
