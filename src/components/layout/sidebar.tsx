@@ -13,6 +13,7 @@ const baseMenuItems = [
   { name: 'Operaciones', href: '/operaciones', icon: FileSpreadsheet },
   { name: 'Nueva Originación', href: '/operaciones/nueva', icon: PlusCircle },
   { name: 'Usuarios', href: '/usuarios', icon: User },
+  { name: 'Auditoría', href: '/auditoria', icon: ShieldAlert, adminOnly: true },
 ];
 
 export default function Sidebar() {
@@ -41,6 +42,9 @@ export default function Sidebar() {
             Consola {user?.role === UserRole.ADMINISTRATOR ? 'Administrador' : 'Operador'}
           </div>
           {baseMenuItems.map((item) => {
+            if (item.adminOnly && user?.role !== UserRole.ADMINISTRATOR) {
+              return null;
+            }
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
               <Link
