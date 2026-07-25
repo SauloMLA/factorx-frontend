@@ -1,45 +1,69 @@
 import { NextResponse, NextRequest } from 'next/server';
-import prisma from '@/lib/prisma';
+
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005').replace(/\/$/, '');
 
 export async function GET(request: NextRequest) {
   try {
+    const accessToken = request.cookies.get('access_token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json({ message: 'No autenticado' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('clientId');
 
-    const operations = await prisma.operationRecord.findMany({
-      where: clientId ? { clientId } : undefined,
-      include: {
-        invoices: true,
+    const url = clientId
+      ? `${API_URL}/operaciones?clientId=${clientId}`
+      : `${API_URL}/operaciones`;
+
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
-      orderBy: { createdAt: 'desc' },
+      cache: 'no-store',
     });
 
-    const mappedOperations = operations.map(op => ({
-      id: op.id,
-      clientId: op.clientId,
-      totalAmount: op.totalAmount,
-      advancedAmount: op.advancedAmount,
-      commission: op.commission,
-      depositAmount: op.depositAmount,
-      createdAt: op.createdAt.toISOString(),
-      invoices: op.invoices.map(inv => ({
-        id: inv.id,
-        operationId: inv.operationId,
-        folio: inv.folio,
-        debtorRfc: inv.debtorRfc,
-        debtorName: inv.debtorName,
-        amount: inv.amount,
-        issueDate: inv.issueDate.toISOString(),
-        dueDate: inv.dueDate.toISOString(),
-        createdAt: inv.createdAt.toISOString(),
-      })),
-    }));
+    const data = await res.json();
 
-    return NextResponse.json(mappedOperations);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Error al obtener operaciones desde el BFF: ' + error.message },
-      { status: 500 }
-    );
+    if (!res.ok) {
+      return NextResponse.json(
+        { message: data.message || 'Error al obtener operaciones' },
+        { status: res.status },
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ message: 'Error de conexión con el backend' }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const accessToken = req.cookies.get('access_token')?.value;
+    const body = await req.json();
+
+    const res = await fetch(`${API_URL}/operaciones`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(
+        { message: data.message || 'Error al crear operación' },
+        { status: res.status },
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ message: 'Error de conexión con el backend' }, { status: 500 });
   }
 }
