@@ -62,13 +62,13 @@ export default function UsersTable() {
           className="w-full sm:w-auto"
         >
           <TabsList className="h-[38px] grid w-full sm:w-[450px] grid-cols-3 p-1 bg-slate-100 dark:bg-[#111625] rounded-xl border border-slate-200 dark:border-[#1e293b]/60">
-            <TabsTrigger value="ALL">
+            <TabsTrigger value="ALL" className="text-[11px] sm:text-xs px-1 sm:px-3 truncate">
               {t('clients.tab_all')} ({users?.length || 0})
             </TabsTrigger>
-            <TabsTrigger value="ADMINISTRATOR">
+            <TabsTrigger value="ADMINISTRATOR" className="text-[11px] sm:text-xs px-1 sm:px-3 truncate">
               Admins ({((users as User[]) || []).filter((u: User) => u.role === 'ADMINISTRATOR').length || 0})
             </TabsTrigger>
-            <TabsTrigger value="OPERATOR">
+            <TabsTrigger value="OPERATOR" className="text-[11px] sm:text-xs px-1 sm:px-3 truncate">
               Operators ({((users as User[]) || []).filter((u: User) => u.role === 'OPERATOR').length || 0})
             </TabsTrigger>
           </TabsList>
