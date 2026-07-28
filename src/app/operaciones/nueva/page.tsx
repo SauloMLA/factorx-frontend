@@ -26,13 +26,55 @@ const getRemainingDays = (reqDate: Date, dueDate: Date) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
+function isValidRfcDate(rfc: string): boolean {
+  const normalised = rfc.replace(/[-\s]/g, '').toUpperCase();
+  const isMoral = /^[A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}$/.test(normalised);
+  const isFisica = /^[A-ZÑ&]{4}[0-9]{6}[A-Z0-9]{3}$/.test(normalised);
+  if (!isMoral && !isFisica) return false;
+
+  const datePart = isMoral ? normalised.substring(3, 9) : normalised.substring(4, 10);
+  const yy = parseInt(datePart.substring(0, 2), 10);
+  const mm = parseInt(datePart.substring(2, 4), 10);
+  const dd = parseInt(datePart.substring(4, 6), 10);
+
+  if (mm < 1 || mm > 12) return false;
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentCenturyYY = currentYear % 100;
+  const year = yy <= currentCenturyYY ? 2000 + yy : 1900 + yy;
+
+  const parsedDate = new Date(Date.UTC(year, mm - 1, dd));
+  if (
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== mm - 1 ||
+    parsedDate.getUTCDate() !== dd
+  ) {
+    return false;
+  }
+
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  if (parsedDate.getTime() > todayUTC) return false;
+
+  const ageInYears = (now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  if (ageInYears > 100) return false;
+
+  return true;
+}
+
 // Esquema de validación estricto para cada Factura del lote
 const invoiceSchema = z.object({
   folio: z.string().min(1, 'El Folio es obligatorio'),
   debtorRfc: z
     .string()
     .min(1, 'El RFC del deudor es obligatorio')
-    .regex(/^[A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}$/i, 'RFC deudor inválido (Persona Moral 12 chars)'),
+    .regex(
+      /^([A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}|[A-ZÑ&]{4}[0-9]{6}[A-Z0-9]{3})$/i,
+      'RFC deudor inválido (Moral 12 chars o Física 13 chars)'
+    )
+    .refine((rfc) => isValidRfcDate(rfc), {
+      message: 'RFC deudor inválido: La fecha (AAMMDD) no existe o supera los 100 años',
+    }),
   debtorName: z.string().min(3, 'Nombre o Razón Social del deudor requerido'),
   amount: z.number().positive('El monto debe ser estrictamente mayor a cero'),
   issueDate: z.string().min(1, 'Fecha de emisión obligatoria'),
@@ -91,7 +133,7 @@ const originationSchema = z
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               path: ['invoices', index, 'dueDate'],
-              message: `El plazo restante (${remainingDays} días) debe estar estrictamente entre 15 y 120 días`,
+              message: `El plazo restante (${remainingDays} días) debe estar strictly entre 15 y 120 días`,
             });
           }
         }
