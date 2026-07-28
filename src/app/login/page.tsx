@@ -42,7 +42,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200 overflow-hidden">
+    <div className="min-h-screen lg:h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-50 dark:bg-[#080b11] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200 overflow-y-auto lg:overflow-hidden">
       
       {/* ─── COLUMNA IZQUIERDA: HERO CORPORATIVO (Solo escritorio) ─── */}
       <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 relative flex-col justify-between p-12 bg-gradient-to-br from-[#060910] via-[#0b1220] to-[#0a1528] text-white overflow-hidden border-r border-slate-800/60 h-full">
@@ -118,7 +118,7 @@ export default function LoginPage() {
       </div>
 
       {/* ─── COLUMNA DERECHA: FORMULARIO PERFECTAMENTE CENTRADO ─── */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col h-full justify-between p-6 sm:p-12 relative">
+      <div className="lg:col-span-6 xl:col-span-5 flex flex-col min-h-screen lg:h-full justify-between p-6 sm:p-12 relative">
         
         {/* Header Superior Derecho */}
         <div className="flex items-center justify-between w-full">

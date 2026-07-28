@@ -85,19 +85,19 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
         </Link>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 dark:border-[#1e293b]/60 pb-5">
           <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{client.name}</h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{client.name}</h1>
               <ClientStatusBadge status={client.status} />
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-500 dark:text-slate-400 font-medium">
+            <div className="flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
               <span>{t('clients.col_rfc')}: <span className="font-mono text-slate-800 dark:text-slate-300">{client.rfc}</span></span>
-              <span>•</span>
+              <span className="hidden sm:inline">•</span>
               <span>{t('clients.col_email')}: <span className="text-slate-800 dark:text-slate-300 font-mono">{client.email}</span></span>
             </div>
           </div>
 
           {/* Acciones Rápidas */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {client.status === 'APPROVED' && operations && operations.length > 0 && (
               <Button
                 onClick={handleExportClientReport}
@@ -145,7 +145,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
 
       {/* KPIs del Expediente Financiero (Solo si está Aprobado) */}
       {client.status === 'APPROVED' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md rounded-2xl">
             <CardContent className="pt-6 flex items-start gap-4">
               <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">

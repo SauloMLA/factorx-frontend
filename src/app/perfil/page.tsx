@@ -27,9 +27,9 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Tarjeta Lateral de Identidad */}
-        <Card className="md:col-span-1 border-slate-200 dark:border-[#1e293b]/60 bg-white dark:bg-[#0c101a] shadow-xl rounded-2xl">
+        <Card className="lg:col-span-1 border-slate-200 dark:border-[#1e293b]/60 bg-white dark:bg-[#0c101a] shadow-xl rounded-2xl">
           <CardContent className="pt-6 flex flex-col items-center text-center space-y-4">
             <div className="h-24 w-24 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-blue-500/20">
               {user.name.charAt(0).toUpperCase()}
@@ -70,7 +70,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Detalles de la Cuenta */}
-        <Card className="md:col-span-2 border-slate-200 dark:border-[#1e293b]/60 bg-white dark:bg-[#0c101a] shadow-xl rounded-2xl">
+        <Card className="lg:col-span-2 border-slate-200 dark:border-[#1e293b]/60 bg-white dark:bg-[#0c101a] shadow-xl rounded-2xl">
           <CardHeader>
             <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">{t('profile.details_title')}</CardTitle>
             <CardDescription className="text-xs text-slate-500 dark:text-slate-400">{t('profile.details_sub')}</CardDescription>

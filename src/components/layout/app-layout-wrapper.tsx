@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
@@ -11,6 +11,7 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isPublicRoute = pathname === '/login';
 
@@ -23,6 +24,11 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
       }
     }
   }, [isAuthenticated, isLoading, isPublicRoute, router]);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // 1. Estado de carga ultralimpio mientras se verifica la sesión en el servidor
   if (isLoading) {
@@ -54,11 +60,11 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
 
   // 4. Si está autenticado, renderizar la consola completa con Sidebar y Header
   return (
-    <div className="flex w-full min-h-screen">
-      <Sidebar />
+    <div className="flex w-full min-h-screen relative overflow-x-hidden">
+      <Sidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header />
-        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
+        <Header onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)} />
+        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto min-w-0">{children}</main>
       </div>
     </div>
   );
