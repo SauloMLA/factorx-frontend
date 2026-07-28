@@ -20,6 +20,42 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+function isValidRfcDate(rfc: string): boolean {
+  const normalised = rfc.replace(/[-\s]/g, '').toUpperCase();
+  const isMoral = /^[A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}$/.test(normalised);
+  const isFisica = /^[A-ZÑ&]{4}[0-9]{6}[A-Z0-9]{3}$/.test(normalised);
+  if (!isMoral && !isFisica) return false;
+
+  const datePart = isMoral ? normalised.substring(3, 9) : normalised.substring(4, 10);
+  const yy = parseInt(datePart.substring(0, 2), 10);
+  const mm = parseInt(datePart.substring(2, 4), 10);
+  const dd = parseInt(datePart.substring(4, 6), 10);
+
+  if (mm < 1 || mm > 12) return false;
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentCenturyYY = currentYear % 100;
+  const year = yy <= currentCenturyYY ? 2000 + yy : 1900 + yy;
+
+  const parsedDate = new Date(Date.UTC(year, mm - 1, dd));
+  if (
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== mm - 1 ||
+    parsedDate.getUTCDate() !== dd
+  ) {
+    return false;
+  }
+
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  if (parsedDate.getTime() > todayUTC) return false;
+
+  const ageInYears = (now.getTime() - parsedDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  if (ageInYears > 100) return false;
+
+  return true;
+}
+
 const registerClientSchema = z.object({
   rfc: z
     .string()
@@ -27,7 +63,10 @@ const registerClientSchema = z.object({
     .regex(
       /^[A-ZÑ&]{3}[0-9]{6}[A-Z0-9]{3}$/i,
       'Valid Mexican Corporate RFC required (12 chars)'
-    ),
+    )
+    .refine((rfc) => isValidRfcDate(rfc), {
+      message: 'RFC inválido: La fecha (AAMMDD) no existe o supera los 100 años',
+    }),
   name: z.string().min(3, 'At least 3 characters required'),
   email: z.string().min(1, 'Email required').email('Invalid email format'),
 });
