@@ -94,7 +94,7 @@ export default function OperationsPage() {
             {t('ops.subtitle')}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={handleExportCSV}
             disabled={filteredOperations.length === 0}

@@ -235,7 +235,7 @@ function NewOperationForm() {
                   {t('ops.config_title')}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 
                 {/* Selector de Cliente */}
                 <div className="space-y-2">
@@ -339,7 +339,7 @@ function NewOperationForm() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         
                         <div className="space-y-1">
                           <label className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('ops.folio')}</label>
@@ -439,7 +439,7 @@ function NewOperationForm() {
 
           {/* Lado Derecho: Resumen Financiero Lateral (SaaS) */}
           <div className="space-y-6">
-            <Card className="bg-white dark:bg-[#0a0d16] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 sticky top-24 shadow-xl rounded-2xl">
+            <Card className="bg-white dark:bg-[#0a0d16] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 lg:sticky lg:top-24 shadow-xl rounded-2xl">
               <CardHeader className="py-4 border-b border-slate-200 dark:border-[#1e293b]/40 bg-slate-50 dark:bg-[#0c111e]">
                 <CardTitle className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                   <ShieldAlert className="h-4 w-4 text-blue-500 dark:text-blue-400 animate-pulse" />

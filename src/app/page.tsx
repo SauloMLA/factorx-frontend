@@ -47,7 +47,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Grid de KPIs Globales */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-md hover:border-blue-500/50 transition-all rounded-2xl">
           <CardContent className="pt-6 flex items-start gap-4">
             <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-600/10 border border-blue-200 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">
@@ -101,7 +101,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Gráficas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         
         {/* Gráfica de Volumen */}
         <Card className="bg-white dark:bg-[#0c101a] border-slate-200 dark:border-[#1e293b]/60 text-slate-800 dark:text-slate-200 shadow-xl rounded-2xl">

@@ -71,13 +71,13 @@ export default function ClientTable() {
           className="w-full sm:w-auto"
         >
           <TabsList className="h-[38px] grid w-full sm:w-[450px] grid-cols-3 p-1 bg-slate-100 dark:bg-[#111625] rounded-xl border border-slate-200 dark:border-[#1e293b]/60">
-            <TabsTrigger value="ALL">
+            <TabsTrigger value="ALL" className="text-[11px] sm:text-xs px-1 sm:px-3 truncate">
               {t('clients.tab_all')} ({clients?.length || 0})
             </TabsTrigger>
-            <TabsTrigger value="APPROVED">
+            <TabsTrigger value="APPROVED" className="text-[11px] sm:text-xs px-1 sm:px-3 truncate">
               {t('clients.tab_approved')} ({clients?.filter(c => c.status === 'APPROVED').length || 0})
             </TabsTrigger>
-            <TabsTrigger value="PENDING">
+            <TabsTrigger value="PENDING" className="text-[11px] sm:text-xs px-1 sm:px-3 truncate">
               {t('clients.tab_pending')} ({clients?.filter(c => c.status === 'PENDING').length || 0})
             </TabsTrigger>
           </TabsList>
