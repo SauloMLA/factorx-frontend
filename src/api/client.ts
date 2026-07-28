@@ -7,6 +7,17 @@ const apiClient = axios.create({
   },
 });
 
+// Interceptor para inyectar automáticamente el Bearer token JWT de sesión en las solicitudes
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('access_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 // Interceptor para manejo global de errores o transformaciones si es necesario
 apiClient.interceptors.response.use(
   (response) => response,
