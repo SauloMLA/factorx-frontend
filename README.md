@@ -27,7 +27,7 @@ La aplicación utiliza Next.js API Routes Proxy (`/app/api/*`) para consumir los
 ## ⚡️ Guía de Ejecución Local
 
 ```bash
-cd financial-app
+cd factorx-frontend
 npm install
 npm run dev   # Inicia en http://localhost:3001
 ```

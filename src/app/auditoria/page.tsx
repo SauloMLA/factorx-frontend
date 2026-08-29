@@ -10,22 +10,28 @@ export default function AuditoriaPage() {
   return (
     <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
       {/* Encabezado Principal */}
-      <div className="flex items-center gap-4 border-b border-slate-200 dark:border-[#1e293b]/60 pb-6">
-        <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 shrink-0">
+      <div className="flex items-center gap-4 border-b border-border pb-6">
+        <div
+          className="h-12 w-12 rounded-2xl flex items-center justify-center text-[oklch(0.07_0_0)] shadow-lg shrink-0"
+          style={{
+            background: 'linear-gradient(135deg, oklch(0.88 0.08 82), oklch(0.72 0.14 82))',
+            boxShadow: '0 4px 20px oklch(0.76 0.12 82 / 30%)',
+          }}
+        >
           <ShieldAlert className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {t('audit.title')}
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+          <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed font-medium">
             {t('audit.subtitle')}
           </p>
         </div>
       </div>
 
-      {/* Contenedor Principal de Auditoría (Glassmorphic Dark Mode Ready) */}
-      <div className="bg-white dark:bg-[#0b0f19]/90 border border-slate-200 dark:border-[#1e293b]/60 rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-md">
+      {/* Contenedor Principal de Auditoría */}
+      <div className="bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-8 backdrop-blur-md">
         <AuditTable />
       </div>
     </div>

@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
 import { useAuth } from '@/hooks/useAuth';
 import { Shield, Loader2 } from 'lucide-react';
+import { pageTransition } from '@/lib/motion';
 
 export default function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,16 +35,22 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
   // 1. Estado de carga ultralimpio mientras se verifica la sesión en el servidor
   if (isLoading) {
     return (
-      <div className="w-full h-screen bg-[#080b11] text-white flex flex-col items-center justify-center space-y-4">
+      <div className="w-full h-screen bg-[oklch(0.07_0_0)] text-white flex flex-col items-center justify-center space-y-5">
         <div className="relative flex items-center justify-center">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center animate-pulse shadow-2xl shadow-blue-500/30">
-            <Shield className="h-8 w-8 text-white" />
+          <div
+            className="h-16 w-16 rounded-2xl flex items-center justify-center shadow-2xl text-[oklch(0.07_0_0)] animate-pulse"
+            style={{
+              background: 'linear-gradient(135deg, oklch(0.88 0.08 82), oklch(0.72 0.14 82))',
+              boxShadow: '0 0 40px oklch(0.76 0.12 82 / 30%)',
+            }}
+          >
+            <Shield className="h-8 w-8" />
           </div>
-          <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-blue-400 animate-spin" />
+          <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 text-[oklch(0.76_0.12_82)] animate-spin" />
         </div>
         <div className="text-center space-y-1">
-          <p className="text-sm font-semibold tracking-wider text-slate-200 uppercase">FactorCore Terminal</p>
-          <p className="text-xs text-slate-500">Verificando credenciales de seguridad...</p>
+          <p className="text-xs font-bold tracking-widest text-white/80 uppercase">FactorCore Terminal</p>
+          <p className="text-[11px] text-white/30 font-mono">Autenticación bancaria y verificación de sesión...</p>
         </div>
       </div>
     );
@@ -55,16 +63,24 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
 
   // 3. Si está en la pantalla de Login pública
   if (isPublicRoute) {
-    return <div className="w-full min-h-screen">{children}</div>;
+    return <div className="w-full min-h-screen bg-background text-foreground">{children}</div>;
   }
 
-  // 4. Si está autenticado, renderizar la consola completa con Sidebar y Header
+  // 4. Consola completa con Sidebar, Header y Transiciones de Página
   return (
-    <div className="flex w-full min-h-screen relative overflow-x-hidden">
+    <div className="flex w-full min-h-screen relative overflow-x-hidden bg-background text-foreground">
       <Sidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)} />
-        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto min-w-0">{children}</main>
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={pathname}
+            {...pageTransition}
+            className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto min-w-0"
+          >
+            {children}
+          </motion.main>
+        </AnimatePresence>
       </div>
     </div>
   );
