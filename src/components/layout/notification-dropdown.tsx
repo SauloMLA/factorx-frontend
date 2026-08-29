@@ -20,12 +20,12 @@ export function NotificationDropdown() {
   const getIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'SUCCESS':
-        return <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />;
+        return <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />;
       case 'WARNING':
       case 'DANGER':
-        return <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />;
+        return <AlertTriangle className="w-4 h-4 text-[oklch(0.76_0.12_82)] shrink-0" />;
       default:
-        return <Info className="w-4 h-4 text-blue-500 shrink-0" />;
+        return <Info className="w-4 h-4 text-[oklch(0.76_0.12_82)] shrink-0" />;
     }
   };
 
@@ -35,12 +35,18 @@ export function NotificationDropdown() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#111625] rounded-xl transition-colors focus:outline-none cursor-pointer"
+        className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-xl transition-colors focus:outline-none cursor-pointer"
         title={t('notif.title')}
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-md shadow-blue-500/30">
+          <span
+            className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black text-[oklch(0.07_0_0)] shadow-md"
+            style={{
+              background: 'linear-gradient(135deg, oklch(0.88 0.08 82), oklch(0.72 0.14 82))',
+              boxShadow: '0 2px 8px oklch(0.76 0.12 82 / 40%)',
+            }}
+          >
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -49,12 +55,12 @@ export function NotificationDropdown() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-[#0f1422] border border-slate-200 dark:border-[#1e293b]/60 shadow-2xl z-40 overflow-hidden backdrop-blur-md">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-[#1e293b]/40 bg-slate-50/50 dark:bg-[#111625]/60">
+          <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-card border border-border shadow-2xl z-40 overflow-hidden backdrop-blur-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40">
               <div className="flex items-center space-x-2">
-                <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">{t('notif.title')}</h3>
+                <h3 className="font-bold text-xs text-foreground uppercase tracking-wider">{t('notif.title')}</h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full font-medium">
+                  <span className="px-2 py-0.5 text-[10px] bg-[oklch(0.76_0.12_82/0.15)] text-[oklch(0.76_0.12_82)] border border-[oklch(0.76_0.12_82/0.25)] rounded-full font-bold">
                     {unreadCount} {t('notif.new')}
                   </span>
                 )}
@@ -63,7 +69,7 @@ export function NotificationDropdown() {
                 <button
                   onClick={handleMarkAllRead}
                   disabled={markAllMutation.isPending}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                  className="text-xs text-[oklch(0.76_0.12_82)] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
                 >
                   <Check className="w-3 h-3" />
                   {t('notif.mark_read')}
@@ -71,9 +77,9 @@ export function NotificationDropdown() {
               )}
             </div>
 
-            <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-[#1e293b]/30">
+            <div className="max-h-80 overflow-y-auto divide-y divide-border">
               {notifications.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                <div className="p-6 text-center text-xs text-muted-foreground">
                   {t('notif.empty')}
                 </div>
               ) : (
@@ -81,14 +87,14 @@ export function NotificationDropdown() {
                   <div
                     key={item.id}
                     className={`p-3.5 text-xs flex gap-3 items-start transition-colors ${
-                      !item.isRead ? 'bg-blue-50/40 dark:bg-blue-950/20' : 'hover:bg-slate-50 dark:hover:bg-[#1e293b]/20'
+                      !item.isRead ? 'bg-[oklch(0.76_0.12_82/0.06)]' : 'hover:bg-muted/40'
                     }`}
                   >
                     {getIcon(item.type)}
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900 dark:text-slate-100">{item.title}</p>
-                      <p className="text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">{item.message}</p>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block font-mono">
+                      <p className="font-semibold text-foreground">{item.title}</p>
+                      <p className="text-muted-foreground mt-0.5 leading-relaxed text-xs">{item.message}</p>
+                      <span className="text-[10px] text-muted-foreground/60 mt-1 block font-mono">
                         {new Date(item.createdAt).toLocaleString(locale, {
                           hour: '2-digit',
                           minute: '2-digit',
